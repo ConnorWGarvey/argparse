@@ -2,22 +2,28 @@ package argparse
 
 class ArgParser {
   Map<String, Closure> flags = [:]
-  
-  def methodMissing(String name, args) {
+
+  boolean makeFlag(String name, args) {
     if (args.size() == 1) {
       def closure = args[0]
       if (closure instanceof Closure) {
-        flags[name] = closure
-      } else {
-        throw new IllegalArgumentException("The value for $name must be a closure")
+        if (closure.maximumNumberOfParameters == 0) {
+          flags[name] = closure
+          return true
+        }
       }
-    } else {
-      throw new IllegalArgumentException("The value for $name must be a closure")
     }
+    return false
+  }
+
+  def methodMissing(String name, args) {
+    if (makeFlag(name, args)) return
+    throw new MissingMethodException(name, ArgParser, args)
   }
   
-  Map<String, Object> parse(args) {
+  List parse(args) {
     def options = [:]
+    def remainingArgs = []
     Iterator<String> i = args.iterator()
     while (i.hasNext()) {
       def arg = i.next()
@@ -26,8 +32,10 @@ class ArgParser {
         if (flags.containsKey(name)) {
           options[name] = flags[name]()
         }
+      } else {
+        remainingArgs << arg
       }
     }
-    options
+    [options, remainingArgs]
   }
 }

@@ -7,10 +7,16 @@ class ArgParseSpec extends Specification {
   
   def 'parse a flag'() {
     setup:
-    def expected = 'expected'
-    parser.arg{'expected'}
-    when: def actual = parser.parse(['-arg'])
+    conf.each{k,v->parser."$k"{->v}}
+    when: def (actualOptions, actualArgs) = parser.parse(argsIn.split())
     then:
-    actual == [arg:expected]
+    actualOptions == options
+    actualArgs == args
+    where:
+    conf    | argsIn   | options | args
+    [a:'e'] | ''       | [:]     | []
+    [a:'e'] | '-a'     | [a:'e'] | []
+    [a:'e'] | '-a b'   | [a:'e'] | ['b']
+    [a:'e'] | '-a b c' | [a:'e'] | ['b', 'c']
   }
 }
