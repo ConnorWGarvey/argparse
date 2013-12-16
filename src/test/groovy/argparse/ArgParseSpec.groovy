@@ -1,18 +1,19 @@
 package argparse
 
 import spock.lang.Specification
+import spock.lang.Unroll
 
-class ArgParseSpec extends Specification {
+@Unroll class ArgParseSpec extends Specification {
   def parser = new ArgParser()
 
-  def 'parse a flag'() {
+  def 'parse a flag for #conf and #argsIn'() {
     setup: conf.each{k,v->parser."$k"{->v}}
     when: def (actualOptions, actualArgs) = parser.parse(argsIn.split())
     then:
     actualOptions == options
     actualArgs == args
     where:
-    conf           | argsIn    | options        | args
+    conf           | argsIn    | myOptions        | args
     [a:'e']        | ''        | [:]            | []
     [a:'e']        | '-a'      | [a:'e']        | []
     [a:'e']        | '-a b'    | [a:'e']        | ['b']
@@ -29,7 +30,7 @@ class ArgParseSpec extends Specification {
     actualOptions == options
     actualArgs == args
     where:
-    conf  | argsIn   | options | args
+    conf  | argsIn   | myOptions | args
     ['a'] | '-a e'   | [a:'e'] | []
     ['a'] | '-a e f' | [a:'e'] | ['f']
   }
@@ -43,5 +44,18 @@ class ArgParseSpec extends Specification {
     where:
     conf  | argsIn
     ['a'] | '-a'
+  }
+
+  def 'parse normal stuff'() {
+    setup:
+    def parser = ArgParser.accepting {p->
+      p.timesTwo{Integer.parseInt(it) * 2}
+      p.add('-i', '--identity')
+      p.otherIdentity('-o')
+    }
+    when: def (options, args) = parser.parse(['--timesTwo', 6, '--identity', 'identity'] as String[])
+    then:
+    options.timesTwo == 12
+    options.identity == 'identity'
   }
 }
