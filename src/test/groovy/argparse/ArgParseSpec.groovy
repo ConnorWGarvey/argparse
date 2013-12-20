@@ -66,10 +66,12 @@ import spock.lang.Unroll
       p.param('identity')
       p.flag('truth')
     }
-    when: def (options, args) = parser.parse(['--duplicate', 'a', '--identity', 'identity', '--truth'] as String[])
+    when: def (options, args) = parser.parse(['arg1', '--duplicate', 'a', 'arg2', '--identity', 'identity', '--truth',
+        'arg3'] as String[])
     then:
     options.duplicate == 'aa'
     options.identity == 'identity'
     options.truth
+    args == ['arg1', 'arg2', 'arg3']
   }
 }
