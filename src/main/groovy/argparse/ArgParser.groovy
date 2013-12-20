@@ -23,7 +23,7 @@ class ArgParser {
     while (i.hasNext()) {
       def arg = i.next()
       if (options.has(arg)) {
-        if (options.isFlag(arg)) options[arg].activate()
+        if (options.isFlag(arg)) options[arg] = true
         else {
           if (!i.hasNext()) throw new ArgParseException("Please provide a value for $arg")
           options[arg] = i.next()

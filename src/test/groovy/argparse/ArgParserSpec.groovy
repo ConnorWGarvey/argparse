@@ -29,7 +29,7 @@ import spock.lang.Unroll
     when: def (options, args) = parser.parse('-a', '-b')
     then:
     options.a
-    options == [a:true]
+    options == [a:'b']
     args == ['-b']
   }
 
@@ -75,14 +75,35 @@ import spock.lang.Unroll
     args == ['arg1', 'arg2', 'arg3']
   }
 
-  def 'parse a flag with true and false values'() {
+  def 'parse a flag with default and non-default values set to default'() {
     setup: parser.flag('-a', default:'off'){'on'}
-    when: def (options, args) = parser.parse(['arg1', '--duplicate', 'a', 'arg2', '--identity', 'identity', '--truth',
-        'arg3'] as String[])
+    when: def (options, args) = parser.parse('hi')
     then:
-    options.duplicate == 'aa'
-    options.identity == 'identity'
-    options.truth
-    args == ['arg1', 'arg2', 'arg3']
+    options.a == 'off'
+    args == ['hi']
+  }
+
+  def 'parse a flag with default and non-default values set to non-default'() {
+    setup: parser.flag('-a', default:'off'){'on'}
+    when: def (options, args) = parser.parse('-a')
+    then:
+    options.a == 'on'
+    args.isEmpty()
+  }
+
+  def 'example 2 from readme'() {
+    parser = ArgParser.accepting { p ->
+      p.flag('truncate', 't', default:{it}){{arg->arg.take(2)}}
+    }
+    when:
+    def (options, args) = parser.parse(argsIn.split())
+    args = args.collect{options.truncate(it)}
+    then:
+    options.truncate
+    args == [expected]
+    where:
+    argsIn    | expected
+    'some'    | 'some'
+    'some -t' | 'so'
   }
 }
