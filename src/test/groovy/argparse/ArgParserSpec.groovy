@@ -4,7 +4,7 @@ import spock.lang.FailsWith
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@Unroll class ArgParseSpec extends Specification {
+@Unroll class ArgParserSpec extends Specification {
   def parser = new ArgParser()
 
   def 'parse a flag for #conf and #argsIn'() {
@@ -66,6 +66,17 @@ import spock.lang.Unroll
       p.param('identity')
       p.flag('truth')
     }
+    when: def (options, args) = parser.parse(['arg1', '--duplicate', 'a', 'arg2', '--identity', 'identity', '--truth',
+        'arg3'] as String[])
+    then:
+    options.duplicate == 'aa'
+    options.identity == 'identity'
+    options.truth
+    args == ['arg1', 'arg2', 'arg3']
+  }
+
+  def 'parse a flag with true and false values'() {
+    setup: parser.flag('-a', default:'off'){'on'}
     when: def (options, args) = parser.parse(['arg1', '--duplicate', 'a', 'arg2', '--identity', 'identity', '--truth',
         'arg3'] as String[])
     then:

@@ -8,7 +8,7 @@ class Options {
 
   void flag(Object... args) {
     def (options, names, closure) = parseArgs(args)
-    myOptions << new Flag(names, closure)
+    myOptions << new Flag(options, names, closure)
   }
 
   boolean has(Map options=[:], String name) {
@@ -37,19 +37,19 @@ class Options {
     if (arg != null) {
       if (arg instanceof Closure) {
         return arg
-      } else throw new IllegalArgumentException('Arguments may be a list of _names, optionally followed by a closure')
+      } else throw new IllegalArgumentException('Arguments may be a map (optional), then a list of _names, then a closure (optional)')
     }
     null
   }
 
-  private Closure parseOptions(ListIterator iterator) {
+  private Map parseOptions(ListIterator iterator) {
     Object arg = iterator.hasNext() ? iterator.next() : null
     if (arg != null) {
       if (arg instanceof Map) {
         return arg
       } else iterator.previous()
     }
-    null
+    [:]
   }
 
   private List parseNames(ListIterator iterator) {
@@ -150,13 +150,26 @@ class Options {
   }
 
   static class Flag {
+    private boolean _active = false
     List<String> _names
     Closure _function
-    boolean _value
+    def _value
 
-    Flag(List _names, Closure _function) {
+    Flag(Map options=[:], List _names, Closure _function) {
       this._names = _names
       this._function = _function
+      if (options.containsKey('default')) {
+        this._value = options.default
+        this._active = true
+      } else this._value = false
+    }
+
+    boolean _hasName(String name) {
+      _names.contains name
+    }
+
+    boolean _hasValue() {
+      _active || _value
     }
 
     String get_name() {
@@ -165,18 +178,6 @@ class Options {
         if (!name || aName.size() > name.size()) name = aName
       }
       name
-    }
-
-    boolean _hasName(String name) {
-      _names.contains name
-    }
-
-    boolean _hasValue() {
-      _value
-    }
-
-    boolean on() {
-      _value
     }
 
     void set_value(value) {

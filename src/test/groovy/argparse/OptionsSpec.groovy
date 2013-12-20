@@ -2,8 +2,9 @@ package argparse
 
 import spock.lang.FailsWith
 import spock.lang.Specification
+import spock.lang.Unroll
 
-class OptionsSpec extends Specification {
+@Unroll class OptionsSpec extends Specification {
   Options options = new Options()
 
   def 'create with one name'() {
@@ -117,9 +118,34 @@ class OptionsSpec extends Specification {
     then: !options.isFlag('a')
   }
 
-  def 'options.name finds the longest name'() {
-    options.param('a', 'ab', 'abc')
+  def '#type name finds the longest name'() {
+    options."$method"('a', 'ab', 'abc')
     expect: options.option('a')._name == 'abc'
+    where:
+    type     | method
+    'option' | 'param'
+    'flag'   | 'flag'
+  }
+
+  def 'flag with a default value of #value'() {
+    when: options.flag('a', default:value){'b'}
+    then:
+    options.a == value
+    options.values() == [a:value]
+    where:
+    value << ['a', false, true]
+  }
+
+  def 'flag with a default value of #defaultValue overridden to #value'() {
+    options.flag('a', default:defaultValue){value}
+    when: options.a = true
+    then:
+    options.a == value
+    options.values() == [a:value]
+    where:
+    defaultValue | value
+    'a'          | 'b'
+    false        | true
   }
 
   def 'values when a value has not been set'() {
