@@ -9,16 +9,16 @@ import spock.lang.Unroll
 
   def 'create with one name'() {
     setup: options.param('name')
-    when: options['name'] = '_value'
+    when: options['name'] = 'value'
     then:
-    options['name'] == '_value'
-    options.name == '_value'
+    options['name'] == 'value'
+    options.name == 'value'
   }
 
   def 'create with two names'() {
     setup: options.param('name1', 'name2')
-    when: options.name1 = '_value'
-    then: options.name2 == '_value'
+    when: options.name1 = 'value'
+    then: options.name2 == 'value'
   }
 
   def 'create with a transformer'() {
@@ -120,11 +120,28 @@ import spock.lang.Unroll
 
   def '#type name finds the longest name'() {
     options."$method"('a', 'ab', 'abc')
-    expect: options.option('a')._name == 'abc'
+    expect: options.option('a').name == 'abc'
     where:
     type     | method
     'option' | 'param'
     'flag'   | 'flag'
+  }
+
+  def 'flag without a value or default value'() {
+    when: options.flag('a')
+    then: !options.a
+  }
+
+  def 'flag without value or default value enabled'() {
+    options.flag('a')
+    when: options.a = true
+    then: options.a
+  }
+
+  def 'flag with a value that fails Groovy truth'() {
+    options.flag('a'){0}
+    when: options.a = true
+    then: options.a == 0
   }
 
   def 'flag with a default value of #value'() {

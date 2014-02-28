@@ -1,12 +1,16 @@
-apply plugin:'eclipse'
-apply plugin:'groovy'
+apply plugin: 'eclipse'
+apply plugin: 'groovy'
 
-repositories{
+repositories {
   mavenCentral()
 }
 
-dependencies{
-  compile 'org.codehaus.groovy:groovy-all:2.2.1'
+dependencies {
+  compile 'org.codehaus.groovy:groovy-all:2.2.2'
+  testCompile 'org.gmock:gmock:0.8.3'
   testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
 }
 
+task wrapper(type:Wrapper) {
+  gradleVersion = '1.10'
+}

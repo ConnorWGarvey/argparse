@@ -2,8 +2,9 @@ package argparse
 
 import groovy.transform.InheritConstructors
 import groovy.transform.PackageScope
+import groovy.transform.ToString
 
-class Options {
+@ToString class Options {
   List myOptions = []
 
   void flag(Object... args) {
@@ -37,7 +38,7 @@ class Options {
     if (arg != null) {
       if (arg instanceof Closure) {
         return arg
-      } else throw new IllegalArgumentException('Arguments may be a map (optional), then a list of _names, then a closure (optional)')
+      } else throw new IllegalArgumentException('Arguments may be a map (optional), then a list of names, then a closure (optional)')
     }
     null
   }
@@ -81,25 +82,25 @@ class Options {
     name = parseName(options, name)
     if (!name) return null
     for (option in myOptions) {
-      if (option._hasName(name)) return option
+      if (option.hasName(name)) return option
     }
   }
 
   def getAt(String name) {
     def option = option(name)
-    if (option) option._value
+    if (option) option.value
     else null
   }
 
   def putAt(String name, Object value) {
     def option = option(name)
-    if (option) option.set_value(value)
+    if (option) option.setValue(value)
     else throw new KeyNotFoundException("Key not found: $name")
   }
 
   def propertyMissing(String name) {
     def option = option(name)
-    if (option != null) return option._value
+    if (option != null) return option.value
     throw new MissingPropertyException(name, ArgParser)
   }
 
@@ -113,77 +114,8 @@ class Options {
 
   def values() {
     myOptions.
-        findAll{it._hasValue()}.
-        collectEntries{[it._name, it._value]}
-  }
-
-  static class Option {
-    List<String> _names
-    Closure _function
-    def _value
-
-    Option(List _names, Closure _function) {
-      this._names = _names
-      this._function = _function
-    }
-
-    String get_name() {
-      def name = null
-      _names.each{aName->
-        if (!name || aName.size() > name.size()) name = aName
-      }
-      name
-    }
-
-    boolean _hasName(String name) {
-      _names.contains name
-    }
-
-    boolean _hasValue() {
-      _value != null
-    }
-
-    void set_value(value) {
-      if (_function) value = _function.call(value)
-      this._value = value
-    }
-  }
-
-  static class Flag {
-    private boolean _active = false
-    List<String> _names
-    Closure _function
-    def _value
-
-    Flag(Map options=[:], List _names, Closure _function) {
-      this._names = _names
-      this._function = _function
-      if (options.containsKey('default')) {
-        this._value = options.default
-        this._active = true
-      } else this._value = false
-    }
-
-    boolean _hasName(String name) {
-      _names.contains name
-    }
-
-    boolean _hasValue() {
-      _active || _value
-    }
-
-    String get_name() {
-      def name = null
-      _names.each{aName->
-        if (!name || aName.size() > name.size()) name = aName
-      }
-      name
-    }
-
-    void set_value(value) {
-      if (_function) value = _function.call(value)
-      this._value = value
-    }
+        findAll{it.hasValue()}.
+        collectEntries{[it.name, it.value]}
   }
 
   @InheritConstructors static class KeyNotFoundException extends Exception {}

@@ -3,6 +3,10 @@ package argparse
 class ArgParser {
   Options options = new Options()
 
+  ArgParser() {
+    options.flag('h', 'help', BuiltIns.help())
+  }
+
   static ArgParser accepting(Closure c) {
     ArgParser parser = new ArgParser()
     c.call(parser)

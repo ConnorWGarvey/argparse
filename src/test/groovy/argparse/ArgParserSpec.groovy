@@ -7,6 +7,12 @@ import spock.lang.Unroll
 @Unroll class ArgParserSpec extends Specification {
   def parser = new ArgParser()
 
+  def 'construct default'() {
+    expect:
+    ['-h','--help'].every{parser.options.has(it)}
+    ['h','help'].every{parser.options.option(it).function.is(BuiltIns.help())}
+  }
+
   def 'parse a flag for #conf and #argsIn'() {
     setup: conf.each{parser.flag(it)}
     when: def (actualOptions, actualArgs) = parser.parse(argsIn.split())
@@ -28,8 +34,8 @@ import spock.lang.Unroll
     setup: parser.flag('a'){'b'}
     when: def (options, args) = parser.parse('-a', '-b')
     then:
-    options.a
     options == [a:'b']
+    options.a
     args == ['-b']
   }
 
